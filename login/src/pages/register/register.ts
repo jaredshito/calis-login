@@ -12,6 +12,7 @@ import { AngularFireAuth } from 'angularfire2/auth'
 })
 export class RegisterPage {
   user = {} as User;
+
   constructor(private afAuth: AngularFireAuth,
     public navCtrl: NavController, public navParams: NavParams) {
   }
