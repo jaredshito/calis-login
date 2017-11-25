@@ -1,41 +1,68 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { User } from "../../models/user";
-import { AngularFireAuth } from 'angularfire2/auth';
-/**
- * Generated class for the LoginPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { 
+  IonicPage, 
+  NavController, 
+  LoadingController, 
+  Loading, 
+  AlertController } from 'ionic-angular';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthProvider } from '../../providers/auth/auth';
+import { EmailValidator } from '../../validators/email';
 
 @IonicPage()
 @Component({
   selector: 'page-login',
-  templateUrl: 'login.html',
+  templateUrl: 'login.html'
 })
 export class LoginPage {
-	
-	user = {} as User;
 
-  constructor(private afAuth: AngularFireAuth,
-    public navCtrl: NavController, public navParams: NavParams) {
+  public loginForm:FormGroup;
+  public loading:Loading;
+
+  constructor(public navCtrl: NavController, public authData: AuthProvider, 
+    public formBuilder: FormBuilder, public alertCtrl: AlertController,
+    public loadingCtrl: LoadingController) {
+
+      this.loginForm = formBuilder.group({
+        email: ['', Validators.compose([Validators.required, EmailValidator.isValid])],
+        password: ['', Validators.compose([Validators.minLength(6), Validators.required])]
+      });
   }
-  async login(user:User){
-    try{
-    const result = this.afAuth.auth.signInWithEmailAndPassword(user.email,user.password);
-    if(result){
-      this.navCtrl.setRoot('HomePage');
-    }
-    }
-    catch(e){
-      console.error(e);
-    }
-      }
 
-  register(){
-    this.navCtrl.push('RegisterPage');
+  loginUser(){
+    if (!this.loginForm.valid){
+      console.log(this.loginForm.value);
+    } else {
+      this.authData.loginUser(this.loginForm.value.email, this.loginForm.value.password)
+      .then( authData => {
+        this.navCtrl.setRoot('HomePage');
+      }, error => {
+        this.loading.dismiss().then( () => {
+          let alert = this.alertCtrl.create({
+            message: error.message,
+            buttons: [
+              {
+                text: "Ok",
+                role: 'cancel'
+              }
+            ]
+          });
+          alert.present();
+        });
+      });
+
+      this.loading = this.loadingCtrl.create({
+        dismissOnPageChange: true,
+      });
+      this.loading.present();
+    }
   }
-  
 
+  goToResetPassword(){
+    this.navCtrl.push('ResetPasswordPage');
+  }
+
+  createAccount(){
+    this.navCtrl.push('SignupPage');
+  }
 }
