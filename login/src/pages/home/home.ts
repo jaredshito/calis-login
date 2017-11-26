@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
 import { AngularFireAuth } from "angularfire2/auth";
+import { AuthProvider } from '../../providers/auth/auth';
 /**
  * Generated class for the HomePage page.
  *
@@ -16,7 +17,7 @@ import { AngularFireAuth } from "angularfire2/auth";
 export class HomePage {
 
   constructor(private afAuth: AngularFireAuth,private toast: ToastController,
-    public navCtrl: NavController, public navParams: NavParams) {
+    public navCtrl: NavController, public navParams: NavParams,public authData: AuthProvider) {
   }
 
   ionViewDidLoad() {
@@ -38,5 +39,7 @@ export class HomePage {
   
   
 }
+logout(){
+  this.authData.logoutUser().then(authData =>{this.navCtrl.setRoot('LoginPage')});
 }
-
+}
